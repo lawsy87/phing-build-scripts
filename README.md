@@ -1,5 +1,5 @@
 Phing build scripts
--------------------
+===================
 
 *Please note this is in progress*
 
@@ -8,7 +8,7 @@ Collection of common Phing build scripts for Studio 24 web projects
 See INSTALL.md for installation instructions.
 
 Usage
-=====
+-----
 
 Deploy to staging
 
@@ -24,7 +24,7 @@ Deploy to live
     phing deploy-live
 
 Updating your build.xml file
-============================
+----------------------------
 If you've changed the build.xml file you'll need to update it before you run the
 next deployment. This can easily be done via:
 
@@ -37,7 +37,7 @@ If your build.xml file is in a custom location in your project please update the
 property *phing.source.dir*
 
 Website document root & Maintenance page
-========================================
+----------------------------------------
 The 'live' and 'staging' symlinks will point to the project root, this will not
 be the actual document root. Usually the document root resides in */web*, and 
 your maintenance page will reside in */maintenance/web*
@@ -56,5 +56,5 @@ Therefore, the maintenance document root is:
     maintenance/sites/cambridgebs.co.uk/public
 
 Phing documentation
-===================
+-------------------
 For further information see [http://www.phing.info/docs/guide/stable/](http://www.phing.info/docs/guide/stable/)
