@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<project name="build" default="prepare">
+
+    <!-- Git repo to deploy site from -->
+    <property name="repo" value="git@bitbucket.org:studio24/cambridgebs.git" />
+	
+    <property name="base.path" value="."/>
+    <property name="mode" value="staging" />
+    <property name="branch" value="master" />
+    <property name="date.timezone" value="Europe/London" />
+    <tstamp>
+        <format property="dateuser.dirname" pattern="%Y%m%d_%H%I%S" />
+    </tstamp>
+    <property name="release.path" value="${base.path}/releases/staging/${date.dirname}" />
+    <taskdef name="deploylog" classname="DeployLogTask" classpath="phing/tasks" />
+	
+    <!-- Any empty folders that need to be created go here -->
+    <target name="create-folders" hidden="true">
+        <mkdir dir="${base.path}/shared/${mode}/sites/cambridgebs.co.uk/public/assets/library" />
+        <mkdir dir="${base.path}/shared/${mode}/data/sessions" />
+        <mkdir dir="${base.path}/shared/${mode}/data/logs" />
+        <mkdir dir="${base.path}/shared/${mode}/data/search" />
+        <mkdir dir="${release.path}/temp/cache/cms" />
+        <mkdir dir="${release.path}/temp/cache/cms/acl" />
+        <mkdir dir="${release.path}/temp/cache/cms/content" />
+        <mkdir dir="${release.path}/temp/cache/cms/nav" />
+        <mkdir dir="${release.path}/temp/cache/cms/role-permissions" />
+        <mkdir dir="${release.path}/temp/cache/cms/tokens" />
+        <mkdir dir="${release.path}/temp/cache/cms/urls" />
+        <mkdir dir="${release.path}/temp/cache/Acl" />
+        <mkdir dir="${release.path}/temp/cache/user" />
+        <mkdir dir="${release.path}/temp/cache/snippets" />
+		
+        <!-- Set Apache writeable permissions -->
+        <exec command="chown -R apache ${base.path}/shared" />
+        <exec command="chown -R apache ${release.path}/temp" />
+    </target>
+    
+    <target name="prepare" description="Creating deployment folder structure">
+        <mkdir dir="${base.path}/logs/staging" />
+        <mkdir dir="${base.path}/logs/live" />
+        <mkdir dir="${base.path}/shared/staging" />
+        <mkdir dir="${base.path}/shared/live" />
+        <mkdir dir="${base.path}/releases/staging" />
+        <mkdir dir="${base.path}/releases/live" />
+        <mkdir dir="${base.path}/tmp" />
+    </target>
+
+    <target name="deploy-staging" depends="prepare" description="Deploy staging website">
+        <property name="mode" value="staging" />
+        <property name="release.path" value="${base.path}/releases/staging/${date.dirname}" />
+                
+        <echo>Creating new staging release</echo>
+        <gitclone repository="${repo}" targetPath="${release.path}" />
+        <gitcheckout repository="${release.path}" branchname="${branch}" />
+        <gitlog repository="${release.path}" maxCount="1" noMerges="true" outputProperty="last.commit" />
+        <phingcall target="create-folders" />
+		
+        <echo>Adding symlinks to shared folders</echo>
+        <symlink target="${base.path}/shared/staging/data" link="${release.path}/data" overwrite="true" />
+        <symlink target="${base.path}/shared/staging/sites/cambridgebs.co.uk/public/assets/library" link="${release.path}/sites/cambridgebs.co.uk/public/assets/library" overwrite="true" />
+		
+        <echo>Running database updates</echo>
+        <chmod file="${base.path}/phing/deployDB.sh" mode="0755" />
+        <exec command="${base.path}/phing/deployDB.sh ${release.path} staging" checkreturn="true" />
+		
+        <echo>Updating staging symlink to new release</echo>
+        <symlink target="${release.path}" link="${base.path}/staging" overwrite="true" />
+        
+        <deploylog repo="${repo}, ${branch} branch" release="${release.path}" to="${base.path}/staging" lastcommit="${last.commit}" logpath="${base.path}/logs/staging" />        
+    </target>
+    
+    <target name="deploy-live" depends="prepare" description="Deploy live website">
+        <property name="mode" value="live" />
+        <property name="release.path" value="${base.path}/releases/live/${date.dirname}" />
+        
+        <echo>Creating new live release</echo>
+        <gitclone repository="${repo}" targetPath="${release.path}" />
+        <gitlog repository="${release.path}" maxCount="1" noMerges="true" outputProperty="last.commit" />
+        <phingcall target="create-folders" />
+		
+        <echo>Adding symlinks to shared folders</echo>
+        <symlink target="${base.path}/shared/live/data" link="${release.path}/data" overwrite="true" />
+        <symlink target="${base.path}/shared/live/sites/cambridgebs.co.uk/public/assets/library" link="${release.path}/sites/cambridgebs.co.uk/public/assets/library" overwrite="true" />
+			
+        <echo>Enabling maintenance page</echo>
+        <symlink target="${release.path}/maintenance" link="${base.path}/live" overwrite="true" />
+		
+        <echo>Running database updates</echo>
+        <chmod file="${base.path}/phing/deployDB.sh" mode="0755" />
+        <exec command="${base.path}/phing/deployDB.sh ${release.path} live" checkreturn="true" />
+		
+        <echo>Updating live symlink to new release</echo>
+        <symlink target="${release.path}" link="${base.path}/live" overwrite="true" />
+		
+        <deploylog repo="${repo}" release="${release.path}" to="${base.path}/live" lastcommit="${last.commit}" logpath="${base.path}/logs/live" email="simon@studio24.net" />
+    </target>
+    
+</project>
