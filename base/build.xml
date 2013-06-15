@@ -4,9 +4,13 @@
     <!-- Git repo to deploy site from -->
     <property name="repo" value="git@bitbucket.org:studio24/cambridgebs.git" />
 	
+    <!-- Email address to send live deploy logs to -->
+    <property name="email" value="simon@studio24.net" />
+    
     <property name="base.path" value="."/>
     <property name="mode" value="staging" />
     <property name="branch" value="master" />
+    <property name="phing.source.dir" value="scripts/phing" />
     <property name="date.timezone" value="Europe/London" />
     <tstamp>
         <format property="dateuser.dirname" pattern="%Y%m%d_%H%I%S" />
@@ -49,8 +53,8 @@
     <target name="deploy-staging" depends="prepare" description="Deploy staging website">
         <property name="mode" value="staging" />
         <property name="release.path" value="${base.path}/releases/staging/${date.dirname}" />
-                
-        <echo>Creating new staging release</echo>
+        
+        <echo>Creating new staging release, ${branch} branch</echo>
         <gitclone repository="${repo}" targetPath="${release.path}" />
         <gitcheckout repository="${release.path}" branchname="${branch}" />
         <gitlog repository="${release.path}" maxCount="1" noMerges="true" outputProperty="last.commit" />
@@ -93,7 +97,20 @@
         <echo>Updating live symlink to new release</echo>
         <symlink target="${release.path}" link="${base.path}/live" overwrite="true" />
 		
-        <deploylog repo="${repo}" release="${release.path}" to="${base.path}/live" lastcommit="${last.commit}" logpath="${base.path}/logs/live" email="simon@studio24.net" />
+        <deploylog repo="${repo}" release="${release.path}" to="${base.path}/live" lastcommit="${last.commit}" logpath="${base.path}/logs/live" email="${email}" />
     </target>
     
+    <target name="self-update" depends="prepare" description="Update the build.xml file to the latest copy">
+        <echo>Updating build.xml file with latest copy from ${repo} ${branch}</echo> 
+        
+        <!-- Copy all files in deploy folder to project root -->
+        <exec command="git archive --remote=${repo} ${branch} ${phing.source.dir} | tar -x -C ${base.path}/tmp" checkreturn="true" />
+        <copy todir="${root.path}" overwrite="true">
+            <fileset dir="${root.path}/tmp/${phing.source.dir}">
+                <include name="**" />
+            </fileset>
+        </copy>
+        <delete dir="${root.path}/tmp/${phing.source.dir}" includeemptydirs="true" failonerror="true" /> 
+    </target>
+        
 </project>
