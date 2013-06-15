@@ -2,7 +2,7 @@
 <project name="build" default="prepare">
 
     <!-- Git repo to deploy site from -->
-    <property name="repo" value="git@bitbucket.org:studio24/cambridgebs.git" />
+    <property name="repo" value="git@bitbucket.org:studio24/project-name.git" />
 	
     <!-- Email address to send live deploy logs to -->
     <property name="email" value="simon@studio24.net" />
