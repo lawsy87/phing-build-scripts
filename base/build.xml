@@ -16,7 +16,7 @@
         <format property="dateuser.dirname" pattern="%Y%m%d_%H%I%S" />
     </tstamp>
     <property name="release.path" value="${base.path}/releases/staging/${date.dirname}" />
-    <taskdef name="deploylog" classname="DeployLogTask" classpath="phing/tasks" />
+    <taskdef name="deploylog" classname="DeployLogTask" classpath="Tasks" />
 	
     <!-- Any empty folders that need to be created go here -->
     <target name="create-folders" hidden="true">
