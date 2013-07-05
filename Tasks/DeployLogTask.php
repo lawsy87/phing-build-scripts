@@ -114,7 +114,7 @@ To:       {$this->to}
                     
 EOD;
 
-        if (!emty($this->lastCommit)) {
+        if (!empty($this->lastCommit)) {
             $log .= <<<EOD
 Latest commit
 -------------
