@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <project name="build" default="prepare">
-    <!-- Base phing build.xml -->
+    <!-- Phing build.xml for Drupal websites -->
     
     <!-- Git repo to deploy site from -->
     <property name="repo" value="git@bitbucket.org:studio24/project-name.git" />
 	
     <!-- Email address to send live deploy logs to -->
-    <property name="email" value="email@studio24.net" />
+    <property name="email" value="simon@studio24.net" />
     
     <property name="base.path" value="."/>
     <property name="mode" value="staging" />
@@ -21,12 +21,10 @@
 	
     <!-- Any empty folders that need to be created go here -->
     <target name="create-folders" hidden="true">
-        <mkdir dir="${base.path}/shared/${mode}/web/assets/documents" />
-        <mkdir dir="${base.path}/shared/${mode}/data" />
-		
+        <mkdir dir="${base.path}/shared/live/default/files" />
+	
         <!-- Set Apache writeable permissions -->
         <exec command="chown -R apache ${base.path}/shared" />
-        <exec command="chown -R apache ${release.path}/temp" />
     </target>
     
     <target name="prepare" description="Creating deployment folder structure">
@@ -48,15 +46,10 @@
         <gitcheckout repository="${release.path}" branchname="${branch}" />
         <gitlog repository="${release.path}" maxCount="1" noMerges="true" outputProperty="last.commit" />
         <phingcall target="create-folders" />
-		
-        <echo>Adding symlinks to shared folders</echo>
-        <symlink target="${base.path}/shared/staging/data" link="${release.path}/data" overwrite="true" />
-        <symlink target="${base.path}/shared/staging/web/assets/documents" link="${release.path}/web/assets/documents" overwrite="true" />
 	
-        <echo>Running database updates</echo>
-        <chmod file="${base.path}/phing/deployDB.sh" mode="0755" />
-        <exec command="${base.path}/phing/deployDB.sh ${release.path} staging" checkreturn="true" />
-		
+        <echo>Adding symlinks to shared folders</echo>
+        <symlink target="${base.path}/shared/staging/default/files" link="${release.path}/web/default/files" overwrite="true" />
+	
         <echo>Updating staging symlink to new release</echo>
         <symlink target="${release.path}" link="${base.path}/staging" overwrite="true" />
         
@@ -72,17 +65,9 @@
         <gitlog repository="${release.path}" maxCount="1" noMerges="true" outputProperty="last.commit" />
         <phingcall target="create-folders" />
 		
-        <echo>Adding symlinks to shared folders</echo>		
-        <symlink target="${base.path}/shared/live/data" link="${release.path}/data" overwrite="true" />
-        <symlink target="${base.path}/shared/live/web/assets/documents" link="${release.path}/web/assets/documents" overwrite="true" />
+        <echo>Adding symlinks to shared folders</echo>
+        <symlink target="${base.path}/shared/live/default/files" link="${release.path}/web/default/files" overwrite="true" />
 	
-        <echo>Enabling maintenance page</echo>
-        <symlink target="${release.path}/maintenance" link="${base.path}/live" overwrite="true" />
-		
-        <echo>Running database updates</echo>
-        <chmod file="${base.path}/phing/deployDB.sh" mode="0755" />
-        <exec command="${base.path}/phing/deployDB.sh ${release.path} live" checkreturn="true" />
-		
         <echo>Updating live symlink to new release</echo>
         <symlink target="${release.path}" link="${base.path}/live" overwrite="true" />
 		

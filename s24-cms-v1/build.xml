@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="build" default="prepare">
-    <!-- Base phing build.xml -->
+    <!-- Phing build.xml for S24 CMS v1 websites -->
     
     <!-- Git repo to deploy site from -->
     <property name="repo" value="git@bitbucket.org:studio24/project-name.git" />
@@ -21,12 +21,19 @@
 	
     <!-- Any empty folders that need to be created go here -->
     <target name="create-folders" hidden="true">
-        <mkdir dir="${base.path}/shared/${mode}/web/assets/documents" />
-        <mkdir dir="${base.path}/shared/${mode}/data" />
-		
+        <mkdir dir="${release.path}/includes_private/saved/smarty/compile" />
+        <mkdir dir="${release.path}/includes_private/saved/smarty/cache" />
+        <mkdir dir="${release.path}/includes_private/saved/logs" />
+        <touch file="${release.path}/includes_private/saved/logs/persist.log" />
+        <mkdir dir="${release.path}/web/includes/_smarty/cc" />
+        <mkdir dir="${release.path}/web/includes/_smarty/cm" />
+        <mkdir dir="${release.path}/web/includes/_smarty/cn" />
+        <mkdir dir="${base.path}/shared/${mode}/documents" />
+        
         <!-- Set Apache writeable permissions -->
-        <exec command="chown -R apache ${base.path}/shared" />
-        <exec command="chown -R apache ${release.path}/temp" />
+        <exec command="chown -R apache ${release.path}/includes_private/saved" />
+        <exec command="chown -R apache ${release.path}/web/includes/_smarty" />
+        <exec command="chown -R apache ${release.path}/web/includes/_smarty" />
     </target>
     
     <target name="prepare" description="Creating deployment folder structure">
@@ -50,8 +57,7 @@
         <phingcall target="create-folders" />
 		
         <echo>Adding symlinks to shared folders</echo>
-        <symlink target="${base.path}/shared/staging/data" link="${release.path}/data" overwrite="true" />
-        <symlink target="${base.path}/shared/staging/web/assets/documents" link="${release.path}/web/assets/documents" overwrite="true" />
+        <symlink target="${base.path}/shared/${mode}/documents" link="${release.path}/web/documents" overwrite="true" />
 	
         <echo>Running database updates</echo>
         <chmod file="${base.path}/phing/deployDB.sh" mode="0755" />
@@ -73,8 +79,7 @@
         <phingcall target="create-folders" />
 		
         <echo>Adding symlinks to shared folders</echo>		
-        <symlink target="${base.path}/shared/live/data" link="${release.path}/data" overwrite="true" />
-        <symlink target="${base.path}/shared/live/web/assets/documents" link="${release.path}/web/assets/documents" overwrite="true" />
+        <symlink target="${base.path}/shared/${mode}/documents" link="${release.path}/web/documents" overwrite="true" />
 	
         <echo>Enabling maintenance page</echo>
         <symlink target="${release.path}/maintenance" link="${base.path}/live" overwrite="true" />
