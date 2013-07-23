@@ -14,7 +14,7 @@
     <property name="phing.source.dir" value="scripts/phing" />
     <property name="date.timezone" value="Europe/London" />
     <tstamp>
-        <format property="dateuser.dirname" pattern="%Y%m%d_%H%I%S" />
+        <format property="date.dirname" pattern="%Y%m%d_%H%I%S" />
     </tstamp>
     <property name="release.path" value="${base.path}/releases/staging/${date.dirname}" />
     <taskdef name="deploylog" classname="DeployLogTask" classpath="Tasks" />
